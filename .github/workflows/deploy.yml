@@ -1,0 +1,58 @@
+name: CI/CD - Build & Deploy
+on:
+  push:
+    branches:
+      - main
+
+env:
+  IMAGE: ${{ secrets.DOCKERHUB_REPO }}:latest
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push image
+        run: |
+          docker build -t "${IMAGE}" .
+          docker push "${IMAGE}"
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            set -e
+            mkdir -p ~/apps/myapp
+            cd ~/apps/myapp
+            if [ -n "${{ secrets.DOCKER_COMPOSE_FILE }}" ]; then
+              echo "${{ secrets.DOCKER_COMPOSE_FILE }}" > docker-compose.yml
+            fi
+            echo "${{ secrets.DOCKER_PASSWORD }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+            sudo docker pull ${{ secrets.DOCKERHUB_REPO }}:latest || true
+            sudo docker compose pull || true
+            sudo docker compose up -d
+            sudo docker image prune -f || true
+            sudo docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
