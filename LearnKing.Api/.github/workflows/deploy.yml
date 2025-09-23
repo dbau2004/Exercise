@@ -1,0 +1,71 @@
+name: CI/CD Pipeline
+- name: Checkout
+uses: actions/checkout@v4
+with:
+fetch-depth: 0
+
+
+- name: Set up Docker Buildx
+uses: docker/setup-buildx-action@v3
+with:
+install: true
+
+
+- name: Login to Docker Hub
+uses: docker/login-action@v3
+with:
+username: ${{ secrets.DOCKER_USERNAME }}
+password: ${{ secrets.DOCKER_PASSWORD }}
+
+
+- name: Build image
+run: |
+docker build -t "$DOCKERHUB_REPO:latest" .
+
+
+- name: Push image
+run: |
+docker push "$DOCKERHUB_REPO:latest"
+
+
+- name: Deploy over SSH
+uses: appleboy/ssh-action@v1.0.3
+with:
+host: ${{ secrets.SERVER_HOST }}
+username: ${{ secrets.SERVER_USERNAME }}
+key: ${{ secrets.SERVER_SSH_KEY }}
+script: |
+set -e
+mkdir -p ~/apps/myapp && cd ~/apps/myapp
+cat > docker-compose.yml <<'YAML'
+version: '3.8'
+services:
+web:
+image: ${DOCKERHUB_REPO}:latest
+container_name: myapp-web
+ports:
+- "8080:3000"
+restart: always
+healthcheck:
+test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+interval: 30s
+timeout: 10s
+retries: 3
+YAML
+
+
+# Tùy stack: sửa PORT/health path tương ứng (Flask: 5000, .NET: 86)
+sed -i "s/3000/${APP_PORT:-3000}/g" docker-compose.yml
+sed -i "s|/health|${HEALTH_PATH:-/health}|g" docker-compose.yml
+
+
+echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+DOCKERHUB_REPO=${{ secrets.DOCKERHUB_REPO }} docker compose pull
+docker compose up -d
+docker image prune -f
+
+
+- name: Post-cleanup
+if: always()
+run: |
+docker logout || true

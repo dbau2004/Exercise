@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LearnKing.Api", "LearnKing.Api\LearnKing.Api.csproj", "{BDC8117C-69BB-3C32-84B5-2DF2865D737A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BDC8117C-69BB-3C32-84B5-2DF2865D737A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDC8117C-69BB-3C32-84B5-2DF2865D737A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDC8117C-69BB-3C32-84B5-2DF2865D737A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDC8117C-69BB-3C32-84B5-2DF2865D737A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F4A8D3FF-771D-4416-B9D7-B4280B12BDBA}
+	EndGlobalSection
+EndGlobal
