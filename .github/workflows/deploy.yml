@@ -11,7 +11,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up QEMU
@@ -22,16 +22,22 @@ jobs:
         with:
           install: true
 
-      - name: Login to DockerHub
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push image
-        run: |
-          docker build -t "${IMAGE}" .
-          docker push "${IMAGE}"
+      - name: Build and push image (buildx)
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE }}
+          platforms: linux/amd64
+          # optional: enable build cache (uncomment if you want)
+          # cache-from: type=gha
+          # cache-to: type=gha,mode=max
 
   deploy:
     needs: build-and-push
@@ -47,11 +53,14 @@ jobs:
             set -e
             mkdir -p ~/apps/myapp
             cd ~/apps/myapp
+            # if you want workflow to create docker-compose file from secret, uncomment:
             if [ -n "${{ secrets.DOCKER_COMPOSE_FILE }}" ]; then
               echo "${{ secrets.DOCKER_COMPOSE_FILE }}" > docker-compose.yml
             fi
+            # login docker on server (use docker username & token from secrets)
             echo "${{ secrets.DOCKER_PASSWORD }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-            sudo docker pull ${{ secrets.DOCKERHUB_REPO }}:latest || true
+            # pull latest image and up with compose (or run docker run)
+            sudo docker pull ${{ env.IMAGE }} || true
             sudo docker compose pull || true
             sudo docker compose up -d
             sudo docker image prune -f || true
