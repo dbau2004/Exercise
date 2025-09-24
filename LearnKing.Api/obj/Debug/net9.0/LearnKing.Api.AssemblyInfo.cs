@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LearnKing.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fd13ecf851774144136cd692c7453a6122b0e809")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6dc5d69db023866dad408d0a03f135995621558d")]
 [assembly: System.Reflection.AssemblyProductAttribute("LearnKing.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LearnKing.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
