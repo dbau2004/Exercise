@@ -15,7 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Mặc định dùng 8000 với Gunicorn
-EXPOSE 8000
+EXPOSE 8080
 
 # Healthcheck KHÔNG cần curl/wget (dùng Python stdlib)
 # Nhớ đảm bảo app có endpoint /health trả về 200
