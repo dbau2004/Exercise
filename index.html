@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hello Flask</title>
+</head>
+
+<body>
+    <h1>Hello from Flask Frontend!</h1>
+    <p>Nếu bạn thấy dòng này, Flask đang chạy thành công 🎉</p>
+    <button onclick="callApi()">Gọi API</button>
+
+    <p id="result"></p>
+
+    <script>
+        async function callApi() {
+            const res = await fetch('/api');
+            const data = await res.json();
+            document.getElementById('result').innerText = data.msg;
+        }
+    </script>
+</body>
+
+</html>x
