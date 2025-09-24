@@ -53,14 +53,33 @@ jobs:
             set -e
             mkdir -p ~/apps/myapp
             cd ~/apps/myapp
-            # if you want workflow to create docker-compose file from secret, uncomment:
-            if [ -n "${{ secrets.DOCKER_COMPOSE_FILE }}" ]; then
-              echo "${{ secrets.DOCKER_COMPOSE_FILE }}" > docker-compose.yml
+
+            # If no docker-compose.yml present, create a simple fallback compose using the built image
+            if [ ! -f docker-compose.yml ]; then
+              cat > docker-compose.yml <<'YAML'
+            version: "3.8"
+            services:
+              web:
+                image: ${IMAGE}
+                container_name: myapp-web
+                restart: always
+                ports:
+                  - "8080:5000"
+                environment:
+                  - PORT=5000
+                healthcheck:
+                  test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+                  interval: 30s
+                  timeout: 10s
+                  retries: 3
+            YAML
             fi
+
             # login docker on server (use docker username & token from secrets)
             echo "${{ secrets.DOCKER_PASSWORD }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
             # pull latest image and up with compose (or run docker run)
-            sudo docker pull ${{ env.IMAGE }} || true
+            sudo docker pull ${IMAGE} || true
             sudo docker compose pull || true
             sudo docker compose up -d
             sudo docker image prune -f || true
